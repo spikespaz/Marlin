@@ -491,10 +491,15 @@
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 
+  // Custom (M303 E0 S220 C10)
+  #define DEFAULT_Kp 21.57
+  #define DEFAULT_Ki 1.58
+  #define DEFAULT_Kd 73.48
+
   // Ender 3 v2
-  #define DEFAULT_Kp 28.72
-  #define DEFAULT_Ki 2.62
-  #define DEFAULT_Kd 78.81
+  // #define DEFAULT_Kp 28.72
+  // #define DEFAULT_Ki 2.62
+  // #define DEFAULT_Kd 78.81
 
   // MakerGear
   //#define DEFAULT_Kp 7.0
@@ -541,11 +546,16 @@
   //#define MIN_BED_POWER 0
   //#define PID_BED_DEBUG // Sends debug data to the serial port.
 
+  // Custom (M303 E-1 S90 C10)
+  #define DEFAULT_bedKp 186.85
+  #define DEFAULT_bedKi 36.42
+  #define DEFAULT_bedKd 639.03
+
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_bedKp 462.10
-  #define DEFAULT_bedKi 85.47
-  #define DEFAULT_bedKd 624.59
+  // #define DEFAULT_bedKp 462.10
+  // #define DEFAULT_bedKi 85.47
+  // #define DEFAULT_bedKd 624.59
 
   //120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   //from pidautotune
