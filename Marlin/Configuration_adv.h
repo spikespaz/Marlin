@@ -21,6 +21,8 @@
  */
 #pragma once
 
+#define CONFIG_EXAMPLES_DIR "Creality/Ender-3 V2"
+
 /**
  * Configuration_adv.h
  *
@@ -182,7 +184,7 @@
    * and/or decrease WATCH_TEMP_INCREASE. WATCH_TEMP_INCREASE should not be set
    * below 2.
    */
-  #define WATCH_TEMP_PERIOD 20                // Seconds
+  #define WATCH_TEMP_PERIOD 40                // Seconds
   #define WATCH_TEMP_INCREASE 2               // Degrees Celsius
 #endif
 
@@ -190,13 +192,13 @@
  * Thermal Protection parameters for the bed are just as above for hotends.
  */
 #if ENABLED(THERMAL_PROTECTION_BED)
-  #define THERMAL_PROTECTION_BED_PERIOD        20 // Seconds
+  #define THERMAL_PROTECTION_BED_PERIOD       180 // Seconds
   #define THERMAL_PROTECTION_BED_HYSTERESIS     2 // Degrees Celsius
 
   /**
    * As described above, except for the bed (M140/M190/M303).
    */
-  #define WATCH_BED_TEMP_PERIOD                60 // Seconds
+  #define WATCH_BED_TEMP_PERIOD               180 // Seconds
   #define WATCH_BED_TEMP_INCREASE               2 // Degrees Celsius
 #endif
 
@@ -339,7 +341,7 @@
 #if ENABLED(EXTRUDER_RUNOUT_PREVENT)
   #define EXTRUDER_RUNOUT_MINTEMP 190
   #define EXTRUDER_RUNOUT_SECONDS 30
-  #define EXTRUDER_RUNOUT_SPEED 1500  // (mm/m)
+  #define EXTRUDER_RUNOUT_SPEED 1500  // (mm/min)
   #define EXTRUDER_RUNOUT_EXTRUDE 5   // (mm)
 #endif
 
@@ -406,7 +408,7 @@
  *
  * Define one or both of these to override the default 0-255 range.
  */
-//#define FAN_MIN_PWM 50
+#define FAN_MIN_PWM 50
 //#define FAN_MAX_PWM 128
 
 /**
@@ -488,7 +490,7 @@
   //#define CASE_LIGHT_MAX_PWM 128            // Limit pwm
   //#define CASE_LIGHT_MENU                   // Add Case Light options to the LCD menu
   //#define CASE_LIGHT_NO_BRIGHTNESS          // Disable brightness control. Enable for non-PWM lighting.
-  //#define CASE_LIGHT_USE_NEOPIXEL           // Use Neopixel LED as case light, requires NEOPIXEL_LED.
+  //#define CASE_LIGHT_USE_NEOPIXEL           // Use NeoPixel LED as case light, requires NEOPIXEL_LED.
   #if ENABLED(CASE_LIGHT_USE_NEOPIXEL)
     #define CASE_LIGHT_NEOPIXEL_COLOR { 255, 255, 255, 255 } // { Red, Green, Blue, White }
   #endif
@@ -680,7 +682,7 @@
    * Danger: Don't activate 5V mode unless attached to a 5V-tolerant controller!
    * V3.0 or 3.1: Set default mode to 5V mode at Marlin startup.
    * If disabled, OD mode is the hard-coded default on 3.0
-   * On startup, Marlin will compare its eeprom to this vale. If the selected mode
+   * On startup, Marlin will compare its eeprom to this value. If the selected mode
    * differs, a mode set eeprom write will be completed at initialization.
    * Use the option below to force an eeprom write to a V3.1 probe regardless.
    */
@@ -769,7 +771,7 @@
 #endif
 
 //
-// Add the G35 command to read bed corners to help adjust screws.
+// Add the G35 command to read bed corners to help adjust screws. Requires a bed probe.
 //
 //#define ASSISTED_TRAMMING
 #if ENABLED(ASSISTED_TRAMMING)
@@ -809,24 +811,30 @@
 #define INVERT_Z_STEP_PIN false
 #define INVERT_E_STEP_PIN false
 
-// Default stepper release if idle. Set to 0 to deactivate.
-// Steppers will shut down DEFAULT_STEPPER_DEACTIVE_TIME seconds after the last move when DISABLE_INACTIVE_? is true.
-// Time can be set by M18 and M84.
+/**
+ * Idle Stepper Shutdown
+ * Set DISABLE_INACTIVE_? 'true' to shut down axis steppers after an idle period.
+ * The Deactive Time can be overridden with M18 and M84. Set to 0 for No Timeout.
+ */
 #define DEFAULT_STEPPER_DEACTIVE_TIME 120
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
-#define DISABLE_INACTIVE_Z true  // Set to false if the nozzle will fall down on your printed part when print has finished.
+#define DISABLE_INACTIVE_Z true  // Set 'false' if the nozzle could fall onto your printed part!
 #define DISABLE_INACTIVE_E true
 
-#define DEFAULT_MINIMUMFEEDRATE       0.0     // minimum feedrate
-#define DEFAULT_MINTRAVELFEEDRATE     0.0
+// If the Nozzle or Bed falls when the Z stepper is disabled, set its resting position here.
+//#define Z_AFTER_DEACTIVATE Z_HOME_POS
 
 //#define HOME_AFTER_DEACTIVATE  // Require rehoming after steppers are deactivated
 
-// Minimum time that a segment needs to take if the buffer is emptied
-#define DEFAULT_MINSEGMENTTIME        20000   // (µs)
+// Default Minimum Feedrates for printing and travel moves
+#define DEFAULT_MINIMUMFEEDRATE       0.0     // (mm/s) Minimum feedrate. Set with M205 S.
+#define DEFAULT_MINTRAVELFEEDRATE     0.0     // (mm/s) Minimum travel feedrate. Set with M205 T.
 
-// Slow down the machine if the look ahead buffer is (by default) half full.
+// Minimum time that a segment needs to take as the buffer gets emptied
+#define DEFAULT_MINSEGMENTTIME        20000   // (µs) Set with M205 B.
+
+// Slow down the machine if the lookahead buffer is (by default) half full.
 // Increase the slowdown divisor for larger buffer sizes.
 #define SLOWDOWN
 #if ENABLED(SLOWDOWN)
@@ -877,7 +885,7 @@
       // increments while checking for the contact to be broken.
       #define BACKLASH_MEASUREMENT_LIMIT       0.5   // (mm)
       #define BACKLASH_MEASUREMENT_RESOLUTION  0.005 // (mm)
-      #define BACKLASH_MEASUREMENT_FEEDRATE    Z_PROBE_SPEED_SLOW // (mm/m)
+      #define BACKLASH_MEASUREMENT_FEEDRATE    Z_PROBE_SPEED_SLOW // (mm/min)
     #endif
   #endif
 #endif
@@ -903,9 +911,9 @@
 
   #define CALIBRATION_MEASUREMENT_RESOLUTION     0.01 // mm
 
-  #define CALIBRATION_FEEDRATE_SLOW             60    // mm/m
-  #define CALIBRATION_FEEDRATE_FAST           1200    // mm/m
-  #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/m
+  #define CALIBRATION_FEEDRATE_SLOW             60    // mm/min
+  #define CALIBRATION_FEEDRATE_FAST           1200    // mm/min
+  #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
   #define CALIBRATION_NOZZLE_TIP_HEIGHT          1.0  // mm
@@ -944,7 +952,7 @@
  * vibration and surface artifacts. The algorithm adapts to provide the best possible step smoothing at the
  * lowest stepping frequencies.
  */
-//#define ADAPTIVE_STEP_SMOOTHING
+#define ADAPTIVE_STEP_SMOOTHING
 
 /**
  * Custom Microstepping
@@ -1019,7 +1027,7 @@
 // @section lcd
 
 #if EITHER(ULTIPANEL, EXTENSIBLE_UI)
-  #define MANUAL_FEEDRATE { 50*60, 50*60, 4*60, 60 } // Feedrates for manual moves along X, Y, Z, E from panel
+  #define MANUAL_FEEDRATE { 50*60, 50*60, 4*60, 2*60 } // (mm/min) Feedrates for manual moves along X, Y, Z, E from panel
   #define SHORT_MANUAL_Z_MOVE 0.025 // (mm) Smallest manual Z move (< 0.1mm)
   #if ENABLED(ULTIPANEL)
     #define MANUAL_E_MOVES_RELATIVE // Display extruder move distance rather than "position"
@@ -1030,8 +1038,9 @@
 // Change values more rapidly when the encoder is rotated faster
 #define ENCODER_RATE_MULTIPLIER
 #if ENABLED(ENCODER_RATE_MULTIPLIER)
-  #define ENCODER_10X_STEPS_PER_SEC   30  // (steps/s) Encoder rate for 10x speed
-  #define ENCODER_100X_STEPS_PER_SEC  80  // (steps/s) Encoder rate for 100x speed
+  #define ENCODER_5X_STEPS_PER_SEC    30
+  #define ENCODER_10X_STEPS_PER_SEC   80  // (steps/s) Encoder rate for 10x speed
+  #define ENCODER_100X_STEPS_PER_SEC  130  // (steps/s) Encoder rate for 100x speed
 #endif
 
 // Play a beep when the feedrate is changed from the Status Screen
@@ -1131,7 +1140,7 @@
 
   //#define MENU_ADDAUTOSTART               // Add a menu option to run auto#.g files
 
-  #define EVENT_GCODE_SD_STOP "G28XY"       // G-code to run on Stop Print (e.g., "G28XY" or "G27")
+  #define EVENT_GCODE_SD_ABORT "G28XY"      // G-code to run on SD Abort Print (e.g., "G28XY" or "G27")
 
   #if ENABLED(PRINTER_EVENT_LEDS)
     #define PE_LEDS_COMPLETED_TIME  (30*60) // (seconds) Time to keep the LED "done" color before restoring normal illumination
@@ -1145,7 +1154,7 @@
    * an option on the LCD screen to continue the print from the last-known
    * point in the file.
    */
-  //#define POWER_LOSS_RECOVERY
+  #define POWER_LOSS_RECOVERY
   #if ENABLED(POWER_LOSS_RECOVERY)
     #define PLR_ENABLED_DEFAULT   false // Power Loss Recovery enabled by default. (Set with 'M413 Sn' & M500)
     //#define BACKUP_POWER_SUPPLY       // Backup power / UPS to move the steppers on power loss
@@ -1184,17 +1193,17 @@
    *  - SDSORT_CACHE_NAMES will retain the sorted file listing in RAM. (Expensive!)
    *  - SDSORT_DYNAMIC_RAM only uses RAM when the SD menu is visible. (Use with caution!)
    */
-  //#define SDCARD_SORT_ALPHA
+  #define SDCARD_SORT_ALPHA
 
   // SD Card Sorting options
   #if ENABLED(SDCARD_SORT_ALPHA)
     #define SDSORT_LIMIT       40     // Maximum number of sorted items (10-256). Costs 27 bytes each.
     #define FOLDER_SORTING     -1     // -1=above  0=none  1=below
     #define SDSORT_GCODE       false  // Allow turning sorting on/off with LCD and M34 G-code.
-    #define SDSORT_USES_RAM    false  // Pre-allocate a static array for faster pre-sorting.
+    #define SDSORT_USES_RAM    true   // Pre-allocate a static array for faster pre-sorting.
     #define SDSORT_USES_STACK  false  // Prefer the stack for pre-sorting to give back some SRAM. (Negated by next 2 options.)
-    #define SDSORT_CACHE_NAMES false  // Keep sorted items in RAM longer for speedy performance. Most expensive option.
-    #define SDSORT_DYNAMIC_RAM false  // Use dynamic allocation (within SD menus). Least expensive option. Set SDSORT_LIMIT before use!
+    #define SDSORT_CACHE_NAMES true   // Keep sorted items in RAM longer for speedy performance. Most expensive option.
+    #define SDSORT_DYNAMIC_RAM true   // Use dynamic allocation (within SD menus). Least expensive option. Set SDSORT_LIMIT before use!
     #define SDSORT_CACHE_VFATS 2      // Maximum number of 13-byte VFAT entries to use for sorting.
                                       // Note: Only affects SCROLL_LONG_FILENAMES with SDSORT_CACHE_NAMES but not SDSORT_DYNAMIC_RAM.
   #endif
@@ -1295,7 +1304,7 @@
  * By default an onboard SD card reader may be shared as a USB mass-
  * storage device. This option hides the SD card from the host PC.
  */
-//#define NO_SD_HOST_DRIVE   // Disable SD Card access over USB (for security).
+#define NO_SD_HOST_DRIVE   // Disable SD Card access over USB (for security).
 
 /**
  * Additional options for Graphical Displays
@@ -1509,9 +1518,10 @@
 #endif
 
 //
-// FSMC Graphical TFT
+// FSMC / SPI Graphical TFT
 //
-#if ENABLED(FSMC_GRAPHICAL_TFT)
+#if TFT_SCALED_DOGLCD
+  //#define GRAPHICAL_TFT_ROTATE_180
   //#define TFT_MARLINUI_COLOR 0xFFFF // White
   //#define TFT_MARLINBG_COLOR 0x0000 // Black
   //#define TFT_DISABLED_COLOR 0x0003 // Almost black
@@ -1552,14 +1562,14 @@
  *
  * Warning: Does not respect endstops!
  */
-//#define BABYSTEPPING
+#define BABYSTEPPING
 #if ENABLED(BABYSTEPPING)
   //#define INTEGRATED_BABYSTEPPING         // EXPERIMENTAL integration of babystepping into the Stepper ISR
   //#define BABYSTEP_WITHOUT_HOMING
   //#define BABYSTEP_XY                     // Also enable X/Y Babystepping. Not supported on DELTA!
   #define BABYSTEP_INVERT_Z false           // Change if Z babysteps should go the other way
   //#define BABYSTEP_MILLIMETER_UNITS       // Specify BABYSTEP_MULTIPLICATOR_(XY|Z) in mm instead of micro-steps
-  #define BABYSTEP_MULTIPLICATOR_Z  1       // (steps or mm) Steps or millimeter distance for each Z babystep
+  #define BABYSTEP_MULTIPLICATOR_Z  40       // (steps or mm) Steps or millimeter distance for each Z babystep
   #define BABYSTEP_MULTIPLICATOR_XY 1       // (steps or mm) Steps or millimeter distance for each XY babystep
 
   //#define DOUBLECLICK_FOR_Z_BABYSTEPPING  // Double-click on the Status Screen for Z Babystepping.
@@ -1978,13 +1988,13 @@
     // Load / Unload
     #define TOOLCHANGE_FS_LENGTH              12  // (mm) Load / Unload length
     #define TOOLCHANGE_FS_EXTRA_RESUME_LENGTH  0  // (mm) Extra length for better restart, fine tune by LCD/Gcode)
-    #define TOOLCHANGE_FS_RETRACT_SPEED   (50*60) // (mm/m) (Unloading)
-    #define TOOLCHANGE_FS_UNRETRACT_SPEED (25*60) // (mm/m) (On SINGLENOZZLE or Bowden loading must be slowed down)
+    #define TOOLCHANGE_FS_RETRACT_SPEED   (50*60) // (mm/min) (Unloading)
+    #define TOOLCHANGE_FS_UNRETRACT_SPEED (25*60) // (mm/min) (On SINGLENOZZLE or Bowden loading must be slowed down)
 
     // Longer prime to clean out a SINGLENOZZLE
     #define TOOLCHANGE_FS_EXTRA_PRIME          0  // (mm) Extra priming length
-    #define TOOLCHANGE_FS_PRIME_SPEED    (4.6*60) // (mm/m) Extra priming feedrate
-    #define TOOLCHANGE_FS_WIPE_RETRACT         0  // (mm/m) Retract before cooling for less stringing, better wipe, etc.
+    #define TOOLCHANGE_FS_PRIME_SPEED    (4.6*60) // (mm/min) Extra priming feedrate
+    #define TOOLCHANGE_FS_WIPE_RETRACT         0  // (mm/min) Retract before cooling for less stringing, better wipe, etc.
 
     // Cool after prime to reduce stringing
     #define TOOLCHANGE_FS_FAN                 -1  // Fan index or -1 to skip
@@ -2020,7 +2030,7 @@
   //#define TOOLCHANGE_PARK
   #if ENABLED(TOOLCHANGE_PARK)
     #define TOOLCHANGE_PARK_XY    { X_MIN_POS + 10, Y_MIN_POS + 10 }
-    #define TOOLCHANGE_PARK_XY_FEEDRATE 6000  // (mm/m)
+    #define TOOLCHANGE_PARK_XY_FEEDRATE 6000  // (mm/min)
     //#define TOOLCHANGE_PARK_X_ONLY          // X axis only move
     //#define TOOLCHANGE_PARK_Y_ONLY          // Y axis only move
   #endif
@@ -2525,7 +2535,7 @@
    * Beta feature!
    * Create a 50/50 square wave step pulse optimal for stepper drivers.
    */
-  //#define SQUARE_WAVE_STEPPING
+  #define SQUARE_WAVE_STEPPING
 
   /**
    * Enable M122 debugging command for TMC stepper drivers.
@@ -2844,7 +2854,7 @@
 //#define SPINDLE_FEATURE
 //#define LASER_FEATURE
 #if EITHER(SPINDLE_FEATURE, LASER_FEATURE)
-  #define SPINDLE_LASER_ACTIVE_HIGH     false  // Set to "true" if the on/off function is active HIGH
+  #define SPINDLE_LASER_ACTIVE_STATE    LOW    // Set to "HIGH" if the on/off function is active HIGH
   #define SPINDLE_LASER_PWM             true   // Set to "true" if your controller supports setting the speed/power
   #define SPINDLE_LASER_PWM_INVERT      false  // Set to "true" if the speed/power goes up when you want it to go slower
 
@@ -3144,7 +3154,7 @@
 //#define GCODE_MOTION_MODES  // Remember the motion mode (G0 G1 G2 G3 G5 G38.X) and apply for X Y Z E F, etc.
 
 // Enable and set a (default) feedrate for all G0 moves
-//#define G0_FEEDRATE 3000 // (mm/m)
+//#define G0_FEEDRATE 3000 // (mm/min)
 #ifdef G0_FEEDRATE
   //#define VARIABLE_G0_FEEDRATE // The G0 feedrate is set by F in G0 motion mode
 #endif
@@ -3461,7 +3471,7 @@
   #if ENABLED(PRUSA_MMU2_S_MODE)
     #define MMU2_C0_RETRY   5             // Number of retries (total time = timeout*retries)
 
-    #define MMU2_CAN_LOAD_FEEDRATE 800    // (mm/m)
+    #define MMU2_CAN_LOAD_FEEDRATE 800    // (mm/min)
     #define MMU2_CAN_LOAD_SEQUENCE \
       {  0.1, MMU2_CAN_LOAD_FEEDRATE }, \
       {  60.0, MMU2_CAN_LOAD_FEEDRATE }, \
